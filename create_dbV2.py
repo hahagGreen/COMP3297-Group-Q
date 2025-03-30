@@ -36,6 +36,7 @@ def create_database():
         accommodation_id INTEGER PRIMARY KEY,
         availability_start TEXT NOT NULL,
         availability_end TEXT NOT NULL,
+        type TEXT NOT NULL,
         beds INTEGER NOT NULL CHECK(beds > 0),
         bedrooms INTEGER NOT NULL CHECK(bedrooms > 0),
         price REAL NOT NULL CHECK(price > 0),

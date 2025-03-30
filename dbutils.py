@@ -21,7 +21,7 @@ def register_user(name, email, password, role):
         cursor.close()
         conn.close()
 
-def add_accommodation(availability_start, availability_end, beds, bedrooms, 
+def add_accommodation(availability_start, availability_end, type, beds, bedrooms, 
                      price, address, latitude=None, longitude=None, geo_address=None):
     """Add a new accommodation listing"""
     conn = sqlite3.connect('unihaven.db')
@@ -29,11 +29,11 @@ def add_accommodation(availability_start, availability_end, beds, bedrooms,
     
     try:
         cursor.execute('''
-        INSERT INTO Accommodation (availability_start, availability_end, beds, 
+        INSERT INTO Accommodation (availability_start, availability_end, type, beds, 
                                   bedrooms, price, address, latitude, longitude, geo_address, 
                                   is_reserved, average_rating, rating_count) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)
-        ''', (availability_start, availability_end, beds, bedrooms, 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)
+        ''', (availability_start, availability_end, type, beds, bedrooms, 
              price, address, latitude, longitude, geo_address))
         accommodation_id = cursor.lastrowid
         conn.commit()

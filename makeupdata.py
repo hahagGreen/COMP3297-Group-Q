@@ -11,6 +11,8 @@ fake = Faker()
 hk_districts = ["Central", "Wan Chai", "Causeway Bay", "North Point", "Quarry Bay", 
                 "Sai Wan", "Kennedy Town", "Sai Ying Pun", "Sheung Wan", "Admiralty"]
 
+typeList = ["Room", "Flat", "Mini-Hall"]
+
 def generate_random_date(start_year=2024, end_year=2026):
     """Generate a random date between start_year and end_year"""
     start_date = datetime.date(start_year, 1, 1)
@@ -80,6 +82,7 @@ def populate_database():
         end_date_obj = start_date_obj + datetime.timedelta(days=30*months_to_add)
         end_date = end_date_obj.strftime("%Y-%m-%d")
         
+        room_type = random.choice(typeList)
         beds = random.randint(1, 4)
         bedrooms = max(1, beds - random.randint(0, 2))  # Ensure bedrooms <= beds
         
@@ -95,7 +98,7 @@ def populate_database():
         longitude = 114.13 + random.uniform(-0.05, 0.05)
         
         accommodation_id = add_accommodation(
-            start_date, end_date, beds, bedrooms, price, address, 
+            start_date, end_date, room_type, beds, bedrooms, price, address, 
             latitude, longitude, address
         )
         
