@@ -110,3 +110,43 @@ def calc_distance(lat1, lon1, lat2, lon2):
     x = (lon2 - lon1) * math.cos((lat1 + lat2) / 2)
     y = lat2 - lat1
     return math.sqrt(x**2 + y**2) * 6371  # Earth radius in km
+
+def view_active_reservations(request):
+    """View Active Reservation."""
+    # Fetch active reservations
+    active_reservations = Reservation.objects.filter(status__in=['pending', 'confirmed'])
+    
+    return render(request, "accommodations/active_reservations.html", {
+        "reservations": active_reservations,
+    })
+
+
+def cancel_reservation(request):
+    """Cancel Reservation."""
+    message = ""
+    accommodation_id = request.POST.get("accommodation_id")
+    
+    if accommodation_id:
+        try:
+            # Update reservation status to 'canceled'
+            updated_count = Reservation.objects.filter(
+                accommodation_id=accommodation_id
+            ).update(status="canceled")
+            
+            if updated_count:
+                # Modify is_reserved in table Accommodation from 1 to 0.
+                Accommodation.objects.filter(
+                    accommodation_id=accommodation_id
+                ).update(is_reserved=0)
+                message = "Reservation Cancelled"
+            else:
+                message = "No matching reservation found"
+        except Exception as e:
+            print(f"Error cancelling reservation: {e}")
+            message = "Error cancelling reservation"
+    else:
+        message = "Accommodation ID not provided"
+    
+    return render(request, "accommodations/cancel_reservation.html", {
+        "message": message
+    })
