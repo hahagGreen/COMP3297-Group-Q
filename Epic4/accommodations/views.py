@@ -14,7 +14,6 @@ def view_accommodations(request):
     return render(request, 'demo.html', {'accommodations': accommodations})
 
 def api_view(request):
-    print(request.GET.get('id'))
     if request.method == 'GET':
         accommodation_id = request.GET.get('id')
         if not accommodation_id:
@@ -40,5 +39,5 @@ def api_view(request):
         except Accommodation.DoesNotExist:
             return JsonResponse({'error': 'Accommodation not found'}, status=404)
     else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
+        return JsonResponse({'error': 'Invalid request method '}, status=405)
 

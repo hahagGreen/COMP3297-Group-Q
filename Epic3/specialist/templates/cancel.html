@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cancellation Result</title>
+    <style>
+        body {
+            text-align: center;
+            margin: 40px;
+        }
+        a {
+            text-decoration: none;
+            color: #3366BB;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cancel Reservation</h1>
+    <p>{{ message }}</p>
+    <p><a href="{% url 'active_reservations' %}">Back to Active Reservations</a></p>
+</body>
+</html>

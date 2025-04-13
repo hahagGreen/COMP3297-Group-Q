@@ -50,13 +50,13 @@ class Accommodation(models.Model):
 
 # Reservation model
 class Reservation(models.Model):
-    TEMP = 'temp'
+    PENDING = 'pending'
     CONFIRMED = 'confirmed'
     CANCELED = 'canceled'
     COMPLETED = 'completed'
     
     STATUS_CHOICES = [
-        (TEMP, 'Temporary (2h)'),
+        (PENDING, 'Pending'),
         (CONFIRMED, 'Confirmed'),
         (CANCELED, 'Canceled'),
         (COMPLETED, 'Completed'),
@@ -65,18 +65,14 @@ class Reservation(models.Model):
     reservation_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     accommodation = models.ForeignKey(Accommodation, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=TEMP)  
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PENDING)  
 
     class Meta:
         db_table = 'Reservation'  # Match the exact table name in your database
         managed = False          # Tell Django this table is managed externally
 
     def save(self, *args, **kwargs):
-        if self.status == self.TEMP and not self.expires_at:
-            self.expires_at = timezone.now() + timezone.timedelta(hours=24)
-        if self.status == self.CONFIRMED:
+        if self.status in [self.CONFIRMED, self.PENDING]:
             self.accommodation.is_reserved = True
             self.accommodation.save()
         elif self.status in [self.CANCELED, self.COMPLETED]:
@@ -84,9 +80,6 @@ class Reservation(models.Model):
             self.accommodation.save()
         
         super().save(*args, **kwargs)
-
-    def is_active(self):
-        return self.status == self.TEMP and timezone.now() < self.expires_at
 
     def __str__(self):
         return f"Reservation {self.reservation_id} - {self.get_status_display()}"
