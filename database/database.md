@@ -38,6 +38,7 @@ Stores information about available housing options.
 | accommodation_id | INTEGER | PRIMARY KEY | Unique identifier |
 | availability_start | TEXT | NOT NULL | Start date of availability period |
 | availability_end | TEXT | NOT NULL | End date of availability period |
+| type | TEXT | NOT NULL CHECK(type IN ('Room', 'Flat', 'Mini hall')) | Types of Reservation
 | beds | INTEGER | NOT NULL, CHECK(beds > 0) | Number of beds available |
 | bedrooms | INTEGER | NOT NULL, CHECK(bedrooms > 0) | Number of bedrooms |
 | price | REAL | NOT NULL, CHECK(price > 0) | Rental price |
