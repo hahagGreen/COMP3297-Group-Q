@@ -4,7 +4,7 @@ from .models import Accommodation, Rating, Reservation
 class AccommodationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Accommodation
-        fields = '__all__'
+        fields = 'average_rating', 'rating_count'
 
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
