@@ -6,7 +6,7 @@ The Accommodations directory contains the API for fetching the accommodation det
 As mentioned in the backlog, this API would automatically fetch data from the database with the primary key, id of the accommodations. After that, the API would return a list of the details of the particular accommodation in Json formatting
 
 **Key Functions**
-1. api_view <br>
+1. api_viewDetails <br>
 Endpoints: /accommodations/api_view
 
 | Method  | Parameters | Description |
