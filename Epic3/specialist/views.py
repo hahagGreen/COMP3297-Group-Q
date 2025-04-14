@@ -1,8 +1,11 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, get_object_or_404
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from django.http import JsonResponse
-from .models import Accommodation
+from .models import Accommodation, User 
 import json
 import requests
+from .serializers import AccommodationSerializer
 # Create your views here.
 
 def fetch_coordinates(location):
@@ -21,15 +24,15 @@ def fetch_coordinates(location):
 
 # Retrieve geolocation data from the API json response
 def getGeoAddress(jsonData):
-    print(jsonData)
     data = jsonData["SuggestedAddress"][0]["Address"]["PremisesAddress"]
     geogAddr = data.get("GeoAddress")
     latitude = data.get("GeospatialInformation").get("Latitude")
     longitude = data.get("GeospatialInformation").get("Longitude")
     return geogAddr, latitude, longitude
 
-def setAccommodation(data):
-    accommodation = Accommodation()
+def setAccommodation(data, isUpdated=False, accommodation=None):
+    if not isUpdated:
+        accommodation = Accommodation()
     accommodation.availability_start = data.get("startDate")
     accommodation.availability_end = data.get("endDate")
     accommodation.type = data.get("type")
@@ -51,23 +54,46 @@ def add_accommodations(request):
         return render(request, "add.html", {"messages": "Accommodation added successfully!", "accommodation": accommodation})
     return render(request, "add.html")
 
+def checkExistence(accommodation_id):
+    try:
+        accommodation = Accommodation.objects.get(accommodation_id=accommodation_id)
+        return True
+    except Accommodation.DoesNotExist:
+        return False
+
+# api for specialist adding accommodation details 
+@api_view(['POST'])
 def api_add(request):
-    if request.method == "POST":
-        accommodation = setAccommodation(request.POST)
-        accommodation.save()
-        accommodation_details = {
-            'id': accommodation.accommodation_id,
-            'startDate': accommodation.availability_start,
-            'endDate': accommodation.availability_end,
-            'type': accommodation.type,
-            'numOfBeds': accommodation.beds,
-            'numOfBedrooms': accommodation.bedrooms,
-            'price': accommodation.price,
-            'address': accommodation.address,
-            'geo_address': accommodation.geo_address,
-            'latitude': accommodation.latitude,
-            'longitude': accommodation.longitude,
-        }
-        return JsonResponse(accommodation_details)
-    else:
-        return HttpResponse("Invalid request method.")
+    userId = request.POST.get('userId')
+    try :
+        user = User.objects.get(user_id=userId)
+        if(user.role != 'Specialist'):
+            return JsonResponse({'error': 'You cannot access to this'}, status=403)
+        # Testing the user role
+        # else :
+        #     print(user.name)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    accommodation = setAccommodation(request.POST)
+    accommodation.save()
+    serializers = AccommodationSerializer(accommodation)
+    return Response(serializers.data)
+
+# api for specialist editing accommodation details
+@api_view(['POST'])
+def api_edit(request):
+    userId = request.POST.get('userId')
+    try :
+        user = User.objects.get(user_id=userId)
+        if(user.role != 'Specialist'):
+            return JsonResponse({'error': 'You cannot access to this as you are not a specialist'}, status=403)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    accommodation_id = request.POST.get('accId')
+    if not checkExistence(accommodation_id):
+        return JsonResponse({'error': 'Accommodation not found'}, status=404)
+    accommodation = Accommodation.objects.get(accommodation_id=accommodation_id)
+    accommodation = setAccommodation(request.POST, True, accommodation)
+    accommodation.save()
+    serializers = AccommodationSerializer(accommodation)
+    return Response(serializers.data)
