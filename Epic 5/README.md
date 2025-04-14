@@ -35,20 +35,8 @@ Output:
       "reservation": 5
     },
     {
-      "accommodation_id": 49,
-      "type": "Room",
-      "availability_start": "2025-04-18",
-      "availability_end": "2026-10-10",
-      "beds": 1,
-      "bedrooms": 1,
-      "price": "9658.68",
-      "address": "29 Malone Rest, A/17, Sai Ying Pun, Hong Kong",
-      "latitude": 22.29446059180258,
-      "longitude": 114.11089824383205,
-      "geo_address": "29 Malone Rest, A/17, Sai Ying Pun, Hong Kong",
-      "is_reserved": true,
-      "rating_count": 2,
-      "average_rating": "4.00"
+      "average_rating": "4.00",
+      "rating_count": 2
     }
   ]
 }
