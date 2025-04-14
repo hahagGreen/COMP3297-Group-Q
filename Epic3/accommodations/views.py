@@ -16,13 +16,13 @@ def view_accommodations(request):
         return render(request, 'view.html', {'accommodation': accommodation, 'rate': rate})
     return render(request, 'demo.html', {'accommodations': accommodations})
 
-# api for fetching accommodation details
+# api for fetching accommodation details Epic3
 @api_view(['GET','POST'])
-def api_view(request):
+def api_viewDetails(request):
     userId = request.POST.get('userId')
     try:
         user = User.objects.get(user_id=userId)
-        print(user.name)
+        # print(user.name)
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
     accommodation_id = request.GET.get('accId')
@@ -32,8 +32,9 @@ def api_view(request):
     try:
         accommodation = get_object_or_404(Accommodation,pk=accommodation_id)
         serializers = AccommodationSerializer(accommodation)
-        return Response(serializers.data)
+        
     except Accommodation.DoesNotExist:
         return JsonResponse({'error': 'Accommodation not found'}, status=404)
+    return Response(serializers.data)
 
 
