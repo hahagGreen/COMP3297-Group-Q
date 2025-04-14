@@ -2,8 +2,8 @@
 There is one main directory, accommodations.
 
 ### 1. Accommodations ###
-The Accommodations directory contains the API for fetching the accommodation details from the UniHaven database. <br>
-As mentioned in the backlog, this API would automatically fetch data from the database with the primary key, id of the accommodations. After that, the API would return a list of the details of the particular accommodation in Json formatting
+The Accommodations directory contains the API for updating the rating score from the UniHaven database. <br>
+As mentioned in the backlog, this API would automatically update and re-calculate the average rating score of the particular accommodation. Then, it would return the up-to-date rating score in Json format
 
 **Key Functions**
 1. api_rate <br>
