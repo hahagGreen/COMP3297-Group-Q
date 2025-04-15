@@ -1,0 +1,418 @@
+openapi: 3.0.3
+info:
+  title: UniHaven API
+  version: 1.0.0
+  description: |-
+    API for managing accommodations, reservations, and specialist operations at UniHaven.
+
+    ## Authentication
+    This API uses session-based authentication. You must be logged in to access the endpoints.
+
+    ## Resources
+    - **Accommodations**: Search and view accommodation details
+    - **Reservations**: Manage user reservations for accommodations
+    - **Specialist Operations**: Manage accommodation listings
+paths:
+  /accommodations/api_view:
+    get:
+      operationId: viewAccommodationDetails
+      summary: View Accommodation Details
+      description: Fetch details of a specific accommodation
+      parameters:
+        - name: accId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Accommodation ID to fetch details for
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID of the user making the request
+      responses:
+        '200':
+          description: Accommodation details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accommodation'
+        '404':
+          description: Accommodation or User not found
+  
+  /accommodations/api_search:
+    get:
+      operationId: searchAccommodations
+      summary: Search Accommodations
+      description: Search for accommodations with various filters
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [Room, Flat, "Mini hall"]
+          description: Type of accommodation
+        - name: availability_start
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date of availability (YYYY-MM-DD)
+        - name: availability_end
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date of availability (YYYY-MM-DD)
+        - name: min_beds
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+          description: Minimum number of beds
+        - name: min_bedrooms
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+          description: Minimum number of bedrooms
+        - name: max_price
+          in: query
+          schema:
+            type: number
+            minimum: 0
+          description: Maximum price in HKD
+        - name: campus_id
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          description: Campus ID for distance calculation
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Accommodation'
+
+  /specialist/api_add/:
+    post:
+      operationId: addAccommodation
+      summary: Add New Accommodation
+      description: Add a new accommodation to the system (Specialist only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  description: ID of the specialist user
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                type:
+                  type: string
+                beds:
+                  type: integer
+                  minimum: 1
+                bedrooms:
+                  type: integer
+                  minimum: 1
+                price:
+                  type: number
+                  minimum: 0
+                address:
+                  type: string
+      responses:
+        '201':
+          description: Accommodation added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accommodation'
+        '403':
+          description: User is not a specialist
+        '404':
+          description: User not found
+
+  /specialist/api_edit/:
+    post:
+      operationId: editAccommodation
+      summary: Edit Accommodation
+      description: Edit an existing accommodation (Specialist only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                accId:
+                  type: integer
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                type:
+                  type: string
+                beds:
+                  type: integer
+                  minimum: 1
+                bedrooms:
+                  type: integer
+                  minimum: 1
+                price:
+                  type: number
+                  minimum: 0
+                address:
+                  type: string
+      responses:
+        '200':
+          description: Accommodation updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accommodation'
+        '403':
+          description: User is not a specialist
+        '404':
+          description: User or Accommodation not found
+
+  /reservation/list/{user_id}/:
+    get:
+      operationId: listUserReservations
+      summary: List User Reservations
+      description: Get all reservations for a specific user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of reservations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reservation'
+        '404':
+          description: User not found
+
+  /reservation/add/{user_id}/{accommodation_id}/:
+    post:
+      operationId: createReservation
+      summary: Create Reservation
+      description: Create a new reservation for an accommodation
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: accommodation_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Reservation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          description: Invalid request (accommodation already reserved/pending reservation exists)
+        '404':
+          description: User or Accommodation not found
+
+  /reservation/cancel/{user_id}/{reservation_id}/:
+    post:
+      operationId: cancelReservation
+      summary: Cancel Reservation
+      description: Cancel an existing reservation
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: reservation_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Reservation cancelled successfully
+        '404':
+          description: Reservation or User not found
+
+  /accommodations/api_rate:
+    post:
+      operationId: rateAccommodation
+      summary: Rate Accommodation
+      description: Add or update rating for a completed reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                reservId:
+                  type: integer
+                accId:
+                  type: integer
+                rating:
+                  type: integer
+                  minimum: 0
+                  maximum: 5
+                date:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Rating updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/Rating'
+                        - $ref: '#/components/schemas/Accommodation'
+        '404':
+          description: User, Reservation or Accommodation not found
+
+components:
+  schemas:
+    Accommodation:
+      type: object
+      properties:
+        accommodation_id:
+          type: integer
+        type:
+          type: string
+        availability_start:
+          type: string
+          format: date
+        availability_end:
+          type: string
+          format: date
+        beds:
+          type: integer
+        bedrooms:
+          type: integer
+        price:
+          type: number
+        address:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        geo_address:
+          type: string
+        is_reserved:
+          type: boolean
+        rating_count:
+          type: integer
+        average_rating:
+          type: number
+
+    Reservation:
+      type: object
+      properties:
+        reservation_id:
+          type: integer
+        user_id:
+          type: integer
+        accommodation_id:
+          type: integer
+        status:
+          type: string
+          enum:
+            - pending
+            - confirmed
+            - canceled
+            - completed
+        created_at:
+          type: string
+          format: date-time
+
+    Rating:
+      type: object
+      properties:
+        rating_id:
+          type: integer
+        reservation_id:
+          type: integer
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 5
+        date:
+          type: string
+          format: date
+
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum:
+            - Student
+            - Specialist
+
+    Campus:
+      type: object
+      properties:
+        campus_id:
+          type: integer
+        name:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
