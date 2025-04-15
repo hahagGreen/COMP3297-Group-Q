@@ -75,8 +75,8 @@ def api_add(request):
 
 def api_cancel_reservation(request):
     """Epic 4.1 Cancel Reservation."""
-    if request.method == 'POST' or request.method == 'GET':
-        reservation_id = request.POST.get("reservation_id") if request.method == 'POST' else request.GET.get("reservation_id")
+    if request.method == 'GET':
+        reservation_id = request.GET.get("reservation_id")
         if reservation_id:
             try:
                 # Update reservation status to 'canceled'
