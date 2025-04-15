@@ -14,7 +14,7 @@ Endpoint: `/specialist/api_active`
 | GET  | None  | Returns all active reservations with "confirmed" or "pending" status |  
 
 ***Sample Input and Output***  
-```json
+```
 1. Valid Request  
 Endpoint: /specialist/api_active  
 Output:  
@@ -50,7 +50,7 @@ Endpoint: `/specialist/api_cancel`
 | GET  | reservation_id (Integer)  | Cancels a reservation if status is "confirmed" or "pending". |
 
 ***Sample Input and Output***
-```json
+```
 1. Valid Cancellation  
 Input:  
       reservation_id = 45  
@@ -62,7 +62,7 @@ Output:
 }
 ```
 
-```json
+```
 2. Invalid Reservation ID  
 Input:  
       reservation_id = NULL
