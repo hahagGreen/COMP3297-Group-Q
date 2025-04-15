@@ -1,1 +1,0 @@
-# COMP3297-Group-Q
