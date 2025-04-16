@@ -2,23 +2,25 @@ from django.shortcuts import render, HttpResponse, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
-from .models import Accommodation,Rating, Specialist,Student, Reservation
+from .models import Accommodation, Rating, Specialist, Student, Reservation, Campus
 from .serializers import AccommodationSerializer, RatingSerializer
 from datetime import datetime
 import math
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 
+
 # Create your views here.
 
 def view_accommodations(request):
     accommodations = Accommodation.objects.all()
-    if(request.method == 'POST'):
+    if (request.method == 'POST'):
         # Handle form submission here
         queryId = request.POST.get('accommodation_id')
-        accommodation = Accommodation.objects.get(accommodation_id = queryId)
-        rate = Rating.objects.get(rating_id = queryId)
+        accommodation = Accommodation.objects.get(accommodation_id=queryId)
+        rate = Rating.objects.get(rating_id=queryId)
         return render(request, 'view.html', {'accommodation': accommodation, 'rate': rate})
     return render(request, 'demo.html', {'accommodations': accommodations})
+
 
 # api for fetching accommodation details Epic3
 @extend_schema(
@@ -35,7 +37,7 @@ def view_accommodations(request):
         404: OpenApiResponse(description='User or Accommodation not found'),
     }
 )
-@api_view(['GET','POST'])
+@api_view(['GET', 'POST'])
 def api_viewDetails(request):
     userId = request.POST.get('userId')
     try:
@@ -46,14 +48,15 @@ def api_viewDetails(request):
     accommodation_id = request.GET.get('accId')
     if not accommodation_id:
         return JsonResponse({'error': 'Accommodation ID is required'}, status=400)
-        
+
     try:
-        accommodation = get_object_or_404(Accommodation,pk=accommodation_id)
+        accommodation = get_object_or_404(Accommodation, pk=accommodation_id)
         serializers = AccommodationSerializer(accommodation)
-        
+
     except Accommodation.DoesNotExist:
         return JsonResponse({'error': 'Accommodation not found'}, status=404)
     return Response(serializers.data)
+
 
 @extend_schema(
     summary="Search accommodations",
@@ -101,7 +104,7 @@ def api_search(request):
             errors.append("Invalid campus ID")
     else:
         errors.append("Campus ID is required")
-            
+
     # Type filter
     type_mapping = {'1': 'Room', '2': 'Flat', '3': 'Mini hall'}
     if 'type' in params:
@@ -115,15 +118,15 @@ def api_search(request):
     try:
         start_date = None
         end_date = None
-        
+
         if 'start_date' in params:
             start_date = datetime.strptime(params['start_date'], '%Y-%m-%d').date()
         if 'end_date' in params:
             end_date = datetime.strptime(params['end_date'], '%Y-%m-%d').date()
-            
+
         if start_date and end_date and start_date > end_date:
             errors.append("End date must be after start date")
-            
+
         if start_date:
             queryset = queryset.filter(availability_end__gte=start_date)
         if end_date:
@@ -163,6 +166,7 @@ def api_search(request):
 
     return JsonResponse(data, safe=False)
 
+
 # api for updating rating details Epic5
 @extend_schema(
     summary="Rate accommodation",
@@ -180,26 +184,26 @@ def api_search(request):
     }
 )
 @api_view(['POST'])
-def api_rate(request):   
+def api_rate(request):
     userId = request.POST.get('userId')
     try:
         user = Student.objects.get(user_id=userId)
         print(user.name)
     except Student.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)  
+        return JsonResponse({'error': 'User not found'}, status=404)
     accommodation_id = request.POST.get('accId')
     newRating = request.POST.get('rating')
     date = request.POST.get('date')
     comment = None
-    if(request.POST.get('comment')):
+    if (request.POST.get('comment')):
         comment = request.POST.get('comment')
     rating = Rating.objects.create(
-            user = Student.objects.get(user_id=userId),
-            accommodation = Accommodation.objects.get(accommodation_id=accommodation_id),
-            rating=newRating,
-            date=date,
-            comment=comment
-        )
+        user=Student.objects.get(user_id=userId),
+        accommodation=Accommodation.objects.get(accommodation_id=accommodation_id),
+        rating=newRating,
+        date=date,
+        comment=comment
+    )
     try:
         accommodation = Accommodation.objects.get(accommodation_id=accommodation_id)
         count = accommodation.rating_count
@@ -217,5 +221,3 @@ def api_rate(request):
         'data': serializer
     }
     return Response(content)
-
-
