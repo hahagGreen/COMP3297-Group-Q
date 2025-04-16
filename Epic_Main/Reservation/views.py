@@ -6,6 +6,8 @@ from rest_framework import status, serializers
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from .models import Reservation, Accommodation, User, Rating
 from .serializers import ReservationSerializer, CreateReservationSerializer
+from django.core.mail import send_mail
+
 
 class ReservationListView(APIView):
     @extend_schema(
@@ -60,6 +62,27 @@ class AddReservationView(APIView):
         accommodation.is_reserved = True
         accommodation.save()
 
+        send_mail(
+            'Reservation Confirmation',
+            f"""
+            Dear {user.name},
+            
+            Your reservation has been successfully created and is now pending approval.
+            
+            Reservation Details:
+            - Reservation ID: {reservation.reservation_id}
+            - Accommodation: {accommodation.type} at {accommodation.address}
+            - Status: Pending
+            
+            We will notify you once your reservation has been reviewed by a specialist.
+            
+            Thank you for using UniHaven!
+            """,
+            'noreplyhku0@gmail.com',
+            [user.email],
+            fail_silently=False,
+        )
+
         serializer = ReservationSerializer(reservation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -86,6 +109,25 @@ class CancelReservationView(APIView):
 
         reservation.status = Reservation.CANCELED
         reservation.save()
+
+        send_mail(
+            'Reservation Cancellation Confirmation',
+            f"""
+            Dear {reservation.user.name},
+            
+            Your reservation has been cancelled successfully.
+            
+            Reservation Details:
+            - Reservation ID: {reservation.reservation_id}
+            - Accommodation: {accommodation.type} at {accommodation.address}
+            - Status: Pending
+        
+            Thank you for using UniHaven!
+            """,
+            'noreplyhku0@gmail.com',
+            [reservation.user.email],
+            fail_silently=False,
+        )
 
         return Response({"message": "Reservation canceled successfully."}, status=status.HTTP_200_OK)
 

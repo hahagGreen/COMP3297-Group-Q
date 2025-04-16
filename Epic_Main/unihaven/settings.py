@@ -155,13 +155,14 @@ SPECTACULAR_SETTINGS = {
     }
 }
 
-# Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development
-EMAIL_HOST = 'smtp.yourserver.com'  # Update for production
-EMAIL_PORT = 587
+# Add email configuration for Gmail SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = ''  # Add in production
-EMAIL_HOST_PASSWORD = ''  # Add in production
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'noreplyhku0@gmail.com'         # Replace with your Gmail address
+EMAIL_HOST_PASSWORD = 'tkyb kieb pbzv comw'        # Replace with your Gmail password or app password
+DEFAULT_FROM_EMAIL = 'noreplyhku0@gmail.com'         # Replace with your Gmail address
 
 # Celery settings for task queue
 CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Update for production

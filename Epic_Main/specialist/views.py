@@ -7,6 +7,7 @@ import json
 import requests
 from .serializers import AccommodationSerializer, ReservationSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
+from django.core.mail import send_mail
 
 # Create your views here.
 
@@ -62,6 +63,7 @@ def checkExistence(accommodation_id):
         return True
     except Accommodation.DoesNotExist:
         return False
+    
 
 # api for specialist adding accommodation details 
 @extend_schema(
@@ -171,6 +173,26 @@ def api_cancel_reservation(request):
                     Accommodation.objects.filter(
                         accommodation_id=accommodation_id
                     ).update(is_reserved=0)
+
+                    # Send email notification to specialist
+                    user = User.objects.get(user_id=userID)
+                    send_mail(
+                        'Reservation Cancellation Confirmation',
+                        f'reservation #{reservation_id} for accommodation at {Accommodation.address} has been cancelled successfully',
+                        'noreplyhku0@gmail.com',
+                        [user.email],
+                        fail_silently=False,
+                    )
+
+                     # Send email notification to the user
+                    send_mail(
+                        'Your Reservation has been cancelled',
+                        f'Your reservation #{reservation_id} for accommodation at {Accommodation.address} has been cancelled',
+                        'noreplyhku0@gmail.com',
+                        [reservation.user.email],
+                        fail_silently=False,
+                    )
+
                     return JsonResponse({'message': 'Reservation Canceled'})
                 else:
                     return JsonResponse({'error': 'No matching reservation found'}, status=404)
@@ -181,6 +203,7 @@ def api_cancel_reservation(request):
             return JsonResponse({'error': 'Reservation ID not provided'}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @extend_schema(
     summary="View active reservations",
