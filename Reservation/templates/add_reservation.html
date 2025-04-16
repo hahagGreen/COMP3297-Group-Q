@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Reservation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555555;
+        }
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        input[readonly] {
+            background-color: #f0f0f0;
+            color: #555555;
+            cursor: not-allowed;
+        }
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Reservation</h1>
+        <form method="post" action="{% url 'add_reservation' %}">
+            {% csrf_token %}
+
+            <!-- User Information -->
+            <label for="user_name">User Name:</label>
+            <input type="text" id="user_name" name="user_name" value="{{ user_name }}" readonly>
+
+            <input type="hidden" name="user_id" value="{{ user_id }}">
+            <input type="hidden" name="accommodation_id" value="{{ accommodation_id }}">
+
+            <!-- Accommodation Information -->
+            <label for="accommodation_type">Accommodation Type:</label>
+            <input type="text" id="accommodation_type" name="accommodation_type" value="{{ accommodation_type }}" readonly>
+
+            <input type="hidden" id="accommodation_id" name="accommodation_id" value="{{ accommodation_id }}">
+            <label for="Duration">Status:</label>
+            <input type="text" id="Duration" name="Duration" value="{{ Duration }}" readonly>
+            <label for="status">Status:</label>
+            <input type="text" id="status" name="status" value="{{ status }}" readonly>
+
+            <!-- Submit Button -->
+            <button type="submit">Add Reservation</button>
+
+            <!-- Error Message -->
+            {% if error_message %}
+                <p class="error">{{ error_message }}</p>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>

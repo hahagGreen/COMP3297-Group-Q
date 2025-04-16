@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        a:hover {
+            color: #0056b3;
+        }
+        .actions {
+            margin-bottom: 20px;
+        }
+        .actions a {
+            margin-right: 15px;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .actions a:hover {
+            background-color: #0056b3;
+        }
+        /* Modal background */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        /* Modal content */
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+        /* Close button */
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #aaa;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+        /* Buttons */
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+        }
+        .modal-button.yes {
+            background-color: #f44336;
+            color: white;
+        }
+        .modal-button.no {
+            background-color: #555;
+            color: white;
+        }
+        /* Rating */
+        .rating {
+            display: flex;
+            gap: 4px;
+        }
+        .star {
+            font-size: 24px;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .star.filled {
+            color: #f5c518;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reservation List</h1>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+        <a href="{% url 'add_reservation' %}">Add New Reservation</a>
+    </div>
+
+    <!-- Reservation Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Accommodation</th>
+                <th>Status</th>
+                <th>Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations %}
+                <tr>
+                    <td>{{ reservation.reservation_id }}</td>
+                    <td>{{ reservation.user.name }}</td>
+                    <td>{{ reservation.accommodation.type }} - {{ reservation.accommodation.address }}</td>
+                    <td>{{ reservation.get_status_display }}</td>
+                    <td>
+                        {% if reservation.status == "completed" %}
+                            {% if reservation.rating %}
+                                <div class="rating" data-reservation-id="{{ reservation.reservation_id }}" data-current-rating="{{ reservation.rating.rating }}">
+                                    {% for i in "12345" %}
+                                        <span class="star {% if forloop.counter <= reservation.rating.rating %}filled{% endif %}">★</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="rating" data-reservation-id="{{ reservation.reservation_id }}" data-current-rating="0">
+                                    {% for i in "12345" %}
+                                        <span class="star">★</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if reservation.status == "pending" %}
+                            <button class="cancel-btn" data-reservation-id="{{ reservation.reservation_id }}"
+                                data-reservation-type="{{ reservation.accommodation.type }}"
+                                data-reservation-detail="{{ reservation.accommodation.availability_start }} to {{ reservation.accommodation.availability_end }}">Cancel</button>
+                        {% elif reservation.status == "completed" %}
+                            <a href="{% url 'Rate_reservation' reservation.reservation_id %}">Rating</a>
+                        {% else %}
+                            <span style="color: grey;"><b>No Action</b></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Are you sure you want to cancel:</p>
+            <p id="reservationType"><strong></strong></p>
+            <p id="reservationDetail"></p>
+            <div class="modal-buttons">
+                <button class="modal-button yes" id="confirmCancel">Yes</button>
+                <button class="modal-button no" id="closeModal">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal elements
+        const modal = document.getElementById('cancelModal');
+        const closeModalBtn = document.querySelector('.close');
+        const confirmCancelBtn = document.getElementById('confirmCancel');
+        const closeModal = document.getElementById('closeModal');
+        let currentReservationId = null;
+        let currentUserId = 1; // This should be dynamically set based on logged-in user
+
+        // Populate modal with reservation data and show modal
+        document.querySelectorAll('.cancel-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const reservationId = button.getAttribute('data-reservation-id');
+                const reservationType = button.getAttribute('data-reservation-type');
+                const reservationDetail = button.getAttribute('data-reservation-detail');
+
+                currentReservationId = reservationId;
+
+                document.getElementById('reservationType').textContent = reservationType;
+                document.getElementById('reservationDetail').textContent = reservationDetail;
+
+                modal.style.display = 'block';
+            });
+        });
+
+        // Close modal
+        closeModalBtn.onclick = () => {
+            modal.style.display = 'none';
+        };
+
+        closeModal.onclick = () => {
+            modal.style.display = 'none';
+        };
+
+        // Confirm cancellation
+        confirmCancelBtn.onclick = () => {
+            if (currentReservationId) {
+                window.location.href = `/reservation/cancel/${currentUserId}/${currentReservationId}/`;
+            }
+        };
+
+        // Close modal when clicking outside of the modal content
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        // Rating functionality
+        document.querySelectorAll('.rating').forEach(ratingDiv => {
+            const stars = ratingDiv.querySelectorAll('.star');
+            const reservationId = ratingDiv.dataset.reservationId;
+            let currentRating = parseInt(ratingDiv.dataset.currentRating);
+
+            stars.forEach((star, index) => {
+                star.addEventListener('mouseover', () => {
+                    for (let i = 0; i <= index; i++) {
+                        stars[i].classList.add('filled');
+                    }
+                    for (let i = index + 1; i < stars.length; i++) {
+                        stars[i].classList.remove('filled');
+                    }
+                });
+
+                star.addEventListener('mouseout', () => {
+                    stars.forEach((s, i) => {
+                        if (i < currentRating) {
+                            s.classList.add('filled');
+                        } else {
+                            s.classList.remove('filled');
+                        }
+                    });
+                });
+
+                star.addEventListener('click', () => {
+                    const rating = index + 1;
+                    fetch(`/reservation/rate/${reservationId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({ rating: rating })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message === 'Rating updated successfully') {
+                            currentRating = rating;
+                            ratingDiv.dataset.currentRating = rating;
+                            stars.forEach((s, i) => {
+                                if (i < rating) {
+                                    s.classList.add('filled');
+                                } else {
+                                    s.classList.remove('filled');
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

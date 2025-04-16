@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Accommodations</title>
+</head>
+<body>
+    <h1>Search Accommodations</h1>
+    <form method="get">
+        <label for="id_accommodation_type">Accommodation Type:</label>
+        <select name="accommodation_type" id="id_accommodation_type">
+            <option value="">Any</option>
+            <option value="Room">Room</option>
+            <option value="Flat">Flat</option>
+            <option value="Mini-Hall">Mini-Hall</option>
+        </select><br>
+    
+        <label for="id_availability_start">Availability Start:</label>
+        <input type="date" name="availability_start" id="id_availability_start"><br>
+    
+        <label for="id_availability_end">Availability End:</label>
+        <input type="date" name="availability_end" id="id_availability_end"><br>
+    
+        <label for="id_min_beds">Minimum Beds:</label>
+        <input type="number" name="min_beds" id="id_min_beds" min="1"><br>
+    
+        <label for="id_min_bedrooms">Minimum Bedrooms:</label>
+        <input type="number" name="min_bedrooms" id="id_min_bedrooms" min="1"><br>
+    
+        <label for="id_max_price">Maximum Price:</label>
+        <input type="number" name="max_price" id="id_max_price" min="0" step="0.01"><br>
+    
+        <label for="id_campus">Sort by Distance from Campus:</label>
+        <select name="campus" id="id_campus">
+            <option value="">None</option>
+            {% for campus in campuses %}
+                <option value="{{ campus.campus_id }}">{{ campus.name }}</option>
+            {% endfor %}
+        </select><br>
+    
+        <button type="submit">Search</button>
+    </form>
+    
+    <h2>Results</h2>
+    {% if accommodations %}
+        {% if active_filters %}
+            <h3>Applied Filters:</h3>
+            <ul>
+                {% for filter in active_filters %}
+                    <li>{{ filter }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <ul>
+        {% for acc in accommodations %}
+            <li>
+                {{ acc.address }} - {{ acc.type }} - {{ acc.beds }} beds - 
+                {{ acc.bedrooms }} bedrooms - HKD {{ acc.price }}
+                {% if acc.distance %}
+                    - Distance: {{ acc.distance|floatformat:2 }} km
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No accommodations found.</p>
+    {% endif %}
+</body>
+</html>
