@@ -271,14 +271,14 @@ paths:
               properties:
                 userId:
                   type: integer
-                reservId:
-                  type: integer
                 accId:
                   type: integer
                 rating:
                   type: integer
                   minimum: 0
                   maximum: 5
+                comment: 
+                  type: string
                 date:
                   type: string
                   format: date
