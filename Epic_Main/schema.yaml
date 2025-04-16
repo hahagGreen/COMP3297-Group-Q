@@ -132,7 +132,13 @@ paths:
                 price:
                   type: number
                   minimum: 0
+                buildingName:
+                  type: string
                 address:
+                  type: string
+                ownerName:
+                  type: string
+                ownerContact:
                   type: string
       responses:
         '201':
@@ -141,10 +147,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Accommodation'
-        '403':
-          description: User is not a specialist
         '404':
-          description: User not found
+          description: User is not a specialist
 
     /specialist/api_modify/:
     post:
