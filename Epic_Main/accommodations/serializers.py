@@ -15,6 +15,9 @@ class AccommodationSerializer(serializers.ModelSerializer):
     numOfBedrooms = serializers.IntegerField(source='bedrooms')
     is_reserved = serializers.SerializerMethodField()
     distance = serializers.SerializerMethodField()
+    building_name = serializers.SerializerMethodField(source='building_name')
+    owner_name = serializers.SerializerMethodField(source='owner_name')
+    owner_contact = serializers.SerializerMethodField(source='owner_contact')
     average_rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
     rating_count = serializers.IntegerField(read_only=True)
 
@@ -24,6 +27,7 @@ class AccommodationSerializer(serializers.ModelSerializer):
             'id', 'startDate', 'endDate', 'type', 'numOfBeds',
             'numOfBedrooms', 'price', 'address',
             'latitude', 'longitude', 'is_reserved', 'distance',
+            'building_name', 'owner_name', 'owner_contact',
             'average_rating', 'rating_count'
         ]
 
