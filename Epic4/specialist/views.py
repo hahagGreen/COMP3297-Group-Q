@@ -74,36 +74,25 @@ def api_add(request):
         return HttpResponse("Invalid request method.")
 
 def api_cancel_reservation(request):
-    """Epic 4.1 Cancel Reservation."""
-    if request.method == 'GET':
-        reservation_id = request.GET.get("reservation_id")
-        if reservation_id:
-            try:
-                # Update reservation status to 'canceled'
-                updated_count = Reservation.objects.filter(
-                    reservation_id=reservation_id
-                ).update(status="canceled")
-                
-                if updated_count:
-                    # Get the accommodation_id from the reservation
-                    reservation = Reservation.objects.get(reservation_id=reservation_id)
-                    accommodation_id = reservation.accommodation_id
-                    
-                    # Modify is_reserved in table Accommodation from 1 to 0.
-                    Accommodation.objects.filter(
-                        accommodation_id=accommodation_id
-                    ).update(is_reserved=0)
-                    return JsonResponse({'message': 'Reservation Canceled'})
-                else:
-                    return JsonResponse({'error': 'No matching reservation found'}, status=404)
-            except Exception as e:
-                print(f"Error cancelling reservation: {e}")
-                return JsonResponse({'error': 'Error cancelling reservation'}, status=500)
-        else:
+    """Epic 4.1 Cancel reservation via POST with URL parameter."""
+    if request.method == 'POST':
+        reservation_id = request.GET.get("reservation_id")  # Get from URL query
+        if not reservation_id:
             return JsonResponse({'error': 'Reservation ID not provided'}, status=400)
+        
+        try:
+            reservation = Reservation.objects.get(reservation_id=reservation_id)
+            reservation.status = Reservation.CANCELED
+            reservation.save()  # Triggers save() to update Accommodation.is_reserved
+            return JsonResponse({'message': 'Reservation canceled successfully'})
+        
+        except Reservation.DoesNotExist:
+            return JsonResponse({'error': 'Reservation not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-
+    
 def api_view_active_reservations(request):
     """Epic 4.2 View Active Reservations."""
     if request.method == 'GET':
@@ -113,4 +102,33 @@ def api_view_active_reservations(request):
         return JsonResponse({'reservations': serializer.data})
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+def api_modify(request):
+    """Epic 4.3 Modify reservation status via POST with URL parameters."""
+    if request.method == 'POST':
+        reservation_id = request.GET.get('reservation_id')  # From URL parameters
+        new_status = request.GET.get('status')             # From URL parameters
 
+        if not reservation_id or not new_status:
+            return JsonResponse({'error': 'Missing reservation_id or status'}, status=400)
+
+        try:
+            reservation = Reservation.objects.get(reservation_id=reservation_id)
+            valid_statuses = [status[0] for status in Reservation.STATUS_CHOICES]
+            
+            if new_status not in valid_statuses:
+                return JsonResponse({'error': 'Invalid status'}, status=400)
+            
+            # Update reservation status
+            reservation.status = new_status
+            reservation.save()  # Triggers save() to update Accommodation.is_reserved
+            
+            return JsonResponse({'message': f'Reservation {reservation_id} status updated to {new_status}'})
+        
+        except Reservation.DoesNotExist:
+            return JsonResponse({'error': 'Reservation not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)

@@ -1,7 +1,7 @@
 ### Epic 4: ###
 
 ### 1. Specialist ###
-The specialist directory contains APIs for reservation management, including cancellation and viewing active reservations. These APIs ensure specialists can efficiently manage accommodations and reservations.
+The specialist directory contains APIs for reservation management, including cancellation, viewing active reservations and modifying reservation. These APIs ensure specialists can efficiently manage reservations.
 
 ---
 
@@ -47,7 +47,7 @@ Endpoint: `/specialist/api_cancel`
 
 | Method  | Parameters | Description |  
 | ------------- | ------------- | ------------- |  
-| GET  | reservation_id (Integer)  | Cancels a reservation if status is "confirmed" or "pending". |
+| POST  | reservation_id (Integer)  | Cancels a reservation if status is "confirmed" or "pending". |
 
 ***Sample Input and Output***
 ```
@@ -69,5 +69,36 @@ Input:
 Output:  
 {
   "error": "Reservation ID not provided"
+}
+```
+
+3. **api_modify**
+Endpoint: `/specialist/api_modify`
+
+| Method  | Parameters | Description |  
+| ------------- | ------------- | ------------- |  
+| POST  | 1.reservation_id (Integer)<br> 2.status (['pending','confirmed','canceled','completed']) | Modify the status of reservation. |
+
+***Sample Input and Output***
+```
+1. Valid Modification  
+Input:  
+      reservation_id = 25 
+      status = pending 
+
+Endpoint: /specialist/api_modify?reservation_id=25&status=pending
+Output:  
+{
+  "message": "Reservation 25 status updated to pending"
+}
+```
+
+```
+2. Invalid Reservation ID or status
+Input:  
+      reservation_id = NULL
+Output:  
+{
+  "error": "Missing reservation_id or status"
 }
 ```
