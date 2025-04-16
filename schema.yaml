@@ -1,0 +1,966 @@
+openapi: 3.0.3
+info:
+  title: UniHaven API
+  version: 1.0.0
+  description: "\n    API for managing reservations at UniHaven accommodations.\n\
+    \    \n    ## Authentication\n    This API uses session-based authentication.\
+    \ You must be logged in to access the endpoints.\n    \n    ## Resources\n   \
+    \ - **Reservations**: Manage user reservations for accommodations\n        - List\
+    \ user reservations\n        - Create new reservations\n        - Cancel existing\
+    \ reservations\n    "
+paths:
+  /accommodations/api_rate:
+    post:
+      operationId: accommodations_api_rate_create
+      description: Add a rating for an accommodation and update the accommodation's
+        average rating.
+      summary: Rate accommodation
+      parameters:
+      - in: query
+        name: accId
+        schema:
+          type: integer
+        description: ID of the accommodation being rated
+        required: true
+      - in: query
+        name: comment
+        schema:
+          type: string
+        description: Optional comment with the rating
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Rating submission date (YYYY-MM-DD)
+        required: true
+      - in: query
+        name: rating
+        schema:
+          type: integer
+        description: Rating value (0-5 stars)
+        required: true
+      - in: query
+        name: userId
+        schema:
+          type: integer
+        description: ID of the student user submitting the rating
+        required: true
+      tags:
+      - accommodations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rating'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Rating'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Rating'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rating'
+          description: Rating updated successfully
+        '404':
+          description: User or Accommodation not found
+  /accommodations/api_search:
+    get:
+      operationId: accommodations_api_search_retrieve
+      description: Search for accommodations with various filters and sort by distance
+        from campus.
+      summary: Search accommodations
+      parameters:
+      - in: query
+        name: campus_id
+        schema:
+          type: integer
+          enum:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+        description: Campus ID for distance calculation
+        required: true
+      - in: query
+        name: end_date
+        schema:
+          type: string
+        description: End date of availability period (YYYY-MM-DD)
+      - in: query
+        name: max_price
+        schema:
+          type: number
+          format: double
+        description: Maximum price per night in HKD
+      - in: query
+        name: min_bedrooms
+        schema:
+          type: integer
+        description: Minimum number of bedrooms required
+      - in: query
+        name: min_beds
+        schema:
+          type: integer
+        description: Minimum number of beds required
+      - in: query
+        name: start_date
+        schema:
+          type: string
+        description: Start date of availability period (YYYY-MM-DD)
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - '1'
+          - '2'
+          - '3'
+        description: Accommodation type (1=Room, 2=Flat, 3=Mini hall)
+      tags:
+      - accommodations
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Accommodation'
+          description: ''
+        '400':
+          description: Invalid parameters provided
+  /accommodations/api_view:
+    get:
+      operationId: accommodations_api_view_retrieve
+      description: Fetch details of a specific accommodation for a given user.
+      summary: View accommodation details
+      parameters:
+      - in: query
+        name: accId
+        schema:
+          type: integer
+        description: Accommodation ID to fetch details for
+        required: true
+      tags:
+      - accommodations
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accommodation'
+          description: ''
+        '400':
+          description: Accommodation ID is required
+        '404':
+          description: User or Accommodation not found
+    post:
+      operationId: accommodations_api_view_create
+      description: Fetch details of a specific accommodation for a given user using
+        POST method.
+      summary: View accommodation details (POST)
+      parameters:
+      - in: query
+        name: accId
+        schema:
+          type: integer
+        description: Accommodation ID to fetch details for
+        required: true
+      tags:
+      - accommodations
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                    description: ID of the user making the request
+                required:
+                - userId
+                example:
+                  userId: 1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accommodation'
+          description: ''
+        '400':
+          description: Accommodation ID is required
+        '404':
+          description: User or Accommodation not found
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /reservation/add/{user_id}/{accommodation_id}/:
+    post:
+      operationId: reservation_add_create
+      description: |-
+        Creates a new reservation for the specified user and accommodation ID.
+                Checks for availability, existing pending reservations, and time overlaps.
+                Marks the accommodation as reserved upon successful creation.
+                Returns the created reservation details or an error message.
+      summary: Create a new reservation
+      parameters:
+      - in: path
+        name: accommodation_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - reservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: Reservation created successfully.
+        '400':
+          description: Bad Request (e.g., accommodation already reserved, pending
+            reservation exists, time overlap).
+        '404':
+          description: User or Accommodation not found.
+  /reservation/cancel/{user_id}/{reservation_id}/:
+    post:
+      operationId: reservation_cancel_create
+      description: |-
+        Cancels the reservation specified by the reservation ID for the given user ID.
+                Marks the associated accommodation as available again.
+                Returns a success message upon cancellation.
+      summary: Cancel an existing reservation
+      parameters:
+      - in: path
+        name: reservation_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - reservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: Reservation canceled successfully.
+        '404':
+          description: Reservation or User not found.
+  /reservation/list/{user_id}/:
+    get:
+      operationId: reservation_list_retrieve
+      description: Retrieves a list of all reservations associated with the given
+        user ID.
+      summary: List user reservations
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - reservation
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reservation'
+          description: List of reservations retrieved successfully.
+        '404':
+          description: User not found.
+  /specialist/api_active:
+    get:
+      operationId: specialist_api_active_retrieve
+      description: Fetch all active reservations for a given user.
+      summary: View active reservations
+      tags:
+      - specialist
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecialistReservation'
+          description: ''
+        '404':
+          description: User not found
+  /specialist/api_add/:
+    post:
+      operationId: specialist_api_add_create
+      description: Add a new accommodation by a specialist
+      summary: Add new accommodation
+      parameters:
+      - in: query
+        name: address
+        schema:
+          type: string
+        description: Physical address
+        required: true
+      - in: query
+        name: bedrooms
+        schema:
+          type: integer
+        description: Number of bedrooms
+        required: true
+      - in: query
+        name: beds
+        schema:
+          type: integer
+        description: Number of beds
+        required: true
+      - in: query
+        name: buildingName
+        schema:
+          type: string
+        description: Name of the building
+      - in: query
+        name: endDate
+        schema:
+          type: string
+        description: Availability end date (YYYY-MM-DD)
+        required: true
+      - in: query
+        name: ownerContact
+        schema:
+          type: string
+        description: Contact information of the owner
+      - in: query
+        name: ownerName
+        schema:
+          type: string
+        description: Name of the owner
+      - in: query
+        name: price
+        schema:
+          type: number
+          format: double
+        description: Price per night in HKD
+        required: true
+      - in: query
+        name: startDate
+        schema:
+          type: string
+        description: Availability start date (YYYY-MM-DD)
+        required: true
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - Flat
+          - Mini hall
+          - Room
+        description: Type of accommodation
+        required: true
+      - in: query
+        name: userId
+        schema:
+          type: integer
+        description: ID of the specialist user
+        required: true
+      tags:
+      - specialist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialistAccommodation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SpecialistAccommodation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SpecialistAccommodation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecialistAccommodation'
+          description: ''
+        '404':
+          description: User not found or not a specialist
+  /specialist/api_cancel:
+    post:
+      operationId: specialist_api_cancel_create
+      description: Cancel an existing reservation via POST with URL parameter.
+      summary: Cancel reservation
+      parameters:
+      - in: query
+        name: reservation_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - specialist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialistReservation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SpecialistReservation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SpecialistReservation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecialistReservation'
+          description: Reservation canceled successfully
+        '400':
+          description: Reservation ID not provided
+        '404':
+          description: Reservation not found
+        '405':
+          description: Invalid request method
+        '500':
+          description: Server error
+  /specialist/api_modify:
+    post:
+      operationId: specialist_api_modify_create
+      description: Modify the status of a reservation via POST with URL parameters.
+      summary: Modify reservation status
+      parameters:
+      - in: query
+        name: reservation_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: status
+        schema:
+          type: string
+        required: true
+      tags:
+      - specialist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialistReservation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SpecialistReservation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SpecialistReservation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecialistReservation'
+          description: Reservation status updated successfully
+        '400':
+          description: Invalid request
+        '404':
+          description: Reservation not found
+        '405':
+          description: Invalid request method
+        '500':
+          description: Server error
+components:
+  schemas:
+    Accommodation:
+      type: object
+      properties:
+        id:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        type:
+          type: string
+          maxLength: 20
+        numOfBeds:
+          type: integer
+        numOfBedrooms:
+          type: integer
+        price:
+          type: number
+          format: double
+        address:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        is_reserved:
+          type: string
+          readOnly: true
+        distance:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        building_name:
+          type: string
+          readOnly: true
+        owner_name:
+          type: string
+          readOnly: true
+        owner_contact:
+          type: string
+          readOnly: true
+        average_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          readOnly: true
+        rating_count:
+          type: integer
+          readOnly: true
+      required:
+      - address
+      - average_rating
+      - building_name
+      - distance
+      - endDate
+      - id
+      - is_reserved
+      - latitude
+      - longitude
+      - numOfBedrooms
+      - numOfBeds
+      - owner_contact
+      - owner_name
+      - price
+      - rating_count
+      - startDate
+      - type
+    Rating:
+      type: object
+      properties:
+        rating_id:
+          type: integer
+          readOnly: true
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 0
+        comment:
+          type: string
+          nullable: true
+        date:
+          type: string
+          format: date
+        user:
+          type: integer
+        accommodation:
+          type: integer
+      required:
+      - accommodation
+      - date
+      - rating
+      - rating_id
+      - user
+    Reservation:
+      type: object
+      properties:
+        reservation_id:
+          type: integer
+          readOnly: true
+        rating:
+          allOf:
+          - $ref: '#/components/schemas/ReservationRating'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        accommodation:
+          type: integer
+          readOnly: true
+      required:
+      - accommodation
+      - rating
+      - reservation_id
+      - status
+      - user
+    ReservationRating:
+      type: object
+      description: Serializer for Rating model in the Reservation app (renamed to
+        avoid collision)
+      properties:
+        rating_id:
+          type: integer
+          readOnly: true
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 0
+        date:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - date
+      - rating
+      - rating_id
+    SpecialistAccommodation:
+      type: object
+      properties:
+        accommodation_id:
+          type: integer
+          readOnly: true
+        availability_start:
+          type: string
+          format: date
+        availability_end:
+          type: string
+          format: date
+        type:
+          type: string
+          maxLength: 20
+        beds:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        bedrooms:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        price:
+          type: number
+          format: double
+        building_name:
+          type: string
+          maxLength: 255
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        address:
+          type: string
+        geo_address:
+          type: string
+          nullable: true
+        owner_name:
+          type: string
+          maxLength: 255
+        owner_contact:
+          type: string
+          maxLength: 255
+        is_reserved:
+          type: boolean
+        average_rating:
+          type: number
+          format: double
+        rating_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        specialist:
+          type: integer
+          nullable: true
+      required:
+      - accommodation_id
+      - address
+      - availability_end
+      - availability_start
+      - bedrooms
+      - beds
+      - building_name
+      - latitude
+      - longitude
+      - owner_contact
+      - owner_name
+      - price
+      - type
+    SpecialistReservation:
+      type: object
+      properties:
+        reservation_id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        user:
+          type: integer
+        accommodation:
+          type: integer
+      required:
+      - accommodation
+      - address
+      - email
+      - reservation_id
+      - user
+      - username
+    StatusEnum:
+      enum:
+      - pending
+      - confirmed
+      - canceled
+      - completed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `confirmed` - Confirmed
+        * `canceled` - Canceled
+        * `completed` - Completed
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
