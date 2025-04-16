@@ -39,9 +39,9 @@ def view_accommodations(request):
 def api_viewDetails(request):
     userId = request.POST.get('userId')
     try:
-        user = User.objects.get(user_id=userId)
+        user = Student.objects.get(user_id=userId)
         # print(user.name)
-    except User.DoesNotExist:
+    except Student.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
     accommodation_id = request.GET.get('accId')
     if not accommodation_id:
