@@ -190,11 +190,15 @@ def api_rate(request):
     accommodation_id = request.POST.get('accId')
     newRating = request.POST.get('rating')
     date = request.POST.get('date')
+    comment = None
+    if(request.POST.get('comment')):
+        comment = request.POST.get('comment')
     rating = Rating.objects.create(
             user = Student.objects.get(user_id=userId),
             accommodation = Accommodation.objects.get(accommodation_id=accommodation_id),
             rating=newRating,
-            date=date
+            date=date,
+            comment=comment
         )
     try:
         accommodation = Accommodation.objects.get(accommodation_id=accommodation_id)
