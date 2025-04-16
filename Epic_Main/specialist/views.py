@@ -47,7 +47,8 @@ def setAccommodation(data):
     query = fetch_coordinates(accommodation.address)[0]
     accommodation.geo_address, accommodation.latitude, accommodation.longitude = getGeoAddress(json.loads(query.text))
     return accommodation
-    
+
+
 def add_accommodations(request):
     if request.method == "POST":
         # Handle form submission here
@@ -57,15 +58,19 @@ def add_accommodations(request):
         # Save the accommodation instance to the database
         return render(request, "add.html", {"messages": "Accommodation added successfully!", "accommodation": accommodation})
     return render(request, "add.html")
-
+    
+@api_view(['POST'])
 def api_add(request):
-    if request.method == "POST":
-        accommodation = setAccommodation(request.POST)
-        accommodation.save()
-        serializers = AccommodationSerializer(accommodation)
-        return Response(serializers.data)
-    else:
-        return HttpResponse("Invalid request method.")
+    userId = request.POST.get('userId')
+    try :
+        user = Specialist.objects.get(specialist_id=userId)
+    except Specialist.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    accommodation = setAccommodation(request.POST)
+    accommodation.save()
+    serializers = AccommodationSerializer(accommodation)
+    return Response(serializers.data)
+
 
 def api_cancel_reservation(request):
     """Epic 4.1 Cancel reservation via POST with URL parameter."""
