@@ -14,15 +14,17 @@ class ReservationListView(APIView):
         summary="List user reservations",
         description="Retrieves a list of all reservations associated with the given user ID.",
         responses={
-            200: OpenApiResponse(response=ReservationSerializer(many=True), description='List of reservations retrieved successfully.'),
+            200: OpenApiResponse(response=ReservationSerializer(many=True),
+                                 description='List of reservations retrieved successfully.'),
             404: OpenApiResponse(description='User not found.'),
         }
     )
     def get(self, request, user_id):
-        user = get_object_or_404(Student, pk=Student.user_id)
+        user = get_object_or_404(Student, pk=user_id)
         reservations = Reservation.objects.filter(user=user)
         serializer = ReservationSerializer(reservations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class AddReservationView(APIView):
     @extend_schema(
@@ -33,25 +35,28 @@ class AddReservationView(APIView):
         Returns the created reservation details or an error message.""",
         responses={
             201: OpenApiResponse(response=ReservationSerializer, description='Reservation created successfully.'),
-            400: OpenApiResponse(description='Bad Request (e.g., accommodation already reserved, pending reservation exists, time overlap).'),
+            400: OpenApiResponse(
+                description='Bad Request (e.g., accommodation already reserved, pending reservation exists, time overlap).'),
             404: OpenApiResponse(description='User or Accommodation not found.'),
         }
     )
     def post(self, request, user_id, accommodation_id):
-        user = get_object_or_404(Student, pk=Student.user_id)
+        user = get_object_or_404(Student, pk=user_id)
         accommodation = get_object_or_404(Accommodation, pk=accommodation_id)
 
         if accommodation.is_reserved:
-            return Response({"error": "The selected accommodation is already reserved."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "The selected accommodation is already reserved."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if Reservation.objects.filter(user=user, status=Reservation.PENDING).exists():
             return Response({"error": "You already have a pending reservation."}, status=status.HTTP_400_BAD_REQUEST)
 
         user_reservations = Reservation.objects.filter(user=user)
         for res in user_reservations:
-            if not (accommodation.availability_end < res.accommodation.availability_start or
-                    accommodation.availability_start > res.accommodation.availability_end):
-                return Response({"error": "Reservation time overlaps with an existing reservation."}, status=status.HTTP_400_BAD_REQUEST)
+            if not ((accommodation.availability_end < res.accommodation.availability_start or
+                    accommodation.availability_start > res.accommodation.availability_end)) and (res.status == "Confirmed" or res.status == "Pending"):
+                return Response({"error": "Reservation time overlaps with an existing reservation."},
+                                status=status.HTTP_400_BAD_REQUEST)
 
         reservation = Reservation.objects.create(
             user=user,
@@ -66,16 +71,16 @@ class AddReservationView(APIView):
             'Reservation Confirmation',
             f"""
             Dear {user.name},
-            
+
             Your reservation has been successfully created and is now pending approval.
-            
+
             Reservation Details:
             - Reservation ID: {reservation.reservation_id}
             - Accommodation: {accommodation.type} at {accommodation.address}
             - Status: Pending
-            
+
             We will notify you once your reservation has been reviewed by a specialist.
-            
+
             Thank you for using UniHaven!
             """,
             'noreplyhku0@gmail.com',
@@ -85,6 +90,7 @@ class AddReservationView(APIView):
 
         serializer = ReservationSerializer(reservation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class CancelReservationView(APIView):
     @extend_schema(
@@ -101,7 +107,8 @@ class CancelReservationView(APIView):
         reservation = get_object_or_404(Reservation, pk=reservation_id, user__user_id=user_id)
 
         if reservation.status not in [Reservation.PENDING, Reservation.CONFIRMED]:
-            return Response({"error": "Cannot cancel a completed or already canceled reservation."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Cannot cancel a completed or already canceled reservation."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         accommodation = reservation.accommodation
         accommodation.is_reserved = False
@@ -114,14 +121,14 @@ class CancelReservationView(APIView):
             'Reservation Cancellation Confirmation',
             f"""
             Dear {reservation.user.name},
-            
+
             Your reservation has been cancelled successfully.
-            
+
             Reservation Details:
             - Reservation ID: {reservation.reservation_id}
             - Accommodation: {accommodation.type} at {accommodation.address}
             - Status: Pending
-        
+
             Thank you for using UniHaven!
             """,
             'noreplyhku0@gmail.com',
@@ -130,6 +137,7 @@ class CancelReservationView(APIView):
         )
 
         return Response({"message": "Reservation canceled successfully."}, status=status.HTTP_200_OK)
+
 
 @extend_schema(
     summary="Rate a completed reservation",
@@ -142,7 +150,7 @@ class CancelReservationView(APIView):
 )
 def rate_reservation(request, reservation_id):
     reservation = get_object_or_404(Reservation, pk=reservation_id)
-    
+
     if reservation.status != Reservation.COMPLETED:
         return Response({"error": "Can only rate completed reservations"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -159,7 +167,7 @@ def rate_reservation(request, reservation_id):
         old_rating = rating.rating
         rating.rating = rating_value
         rating.save()
-        
+
         # Update accommodation average rating
         accommodation = reservation.accommodation
         total_rating = accommodation.average_rating * accommodation.rating_count
@@ -183,14 +191,16 @@ def rate_reservation(request, reservation_id):
         }
     })
 
+
 # Web views
 def reservation_list_view(request, user_id):
-    user = get_object_or_404(Student, pk=Student.user_id)
+    user = get_object_or_404(Student, pk=user_id)
     reservations = Reservation.objects.filter(user=user)
     return render(request, 'reservation_list.html', {
         'reservations': reservations,
         'user': user
     })
+
 
 def add_reservation_view(request):
     return render(request, 'add_reservation.html')
