@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, serializers
 from drf_spectacular.utils import extend_schema, OpenApiResponse
-from .models import Reservation, Accommodation, User, Rating
+from .models import Reservation, Accommodation, Student, Rating
 from .serializers import ReservationSerializer, CreateReservationSerializer
 from django.core.mail import send_mail
 
@@ -19,7 +19,7 @@ class ReservationListView(APIView):
         }
     )
     def get(self, request, user_id):
-        user = get_object_or_404(User, pk=user_id)
+        user = get_object_or_404(Student, pk=Student.user_id)
         reservations = Reservation.objects.filter(user=user)
         serializer = ReservationSerializer(reservations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -38,7 +38,7 @@ class AddReservationView(APIView):
         }
     )
     def post(self, request, user_id, accommodation_id):
-        user = get_object_or_404(User, pk=user_id)
+        user = get_object_or_404(Student, pk=Student.user_id)
         accommodation = get_object_or_404(Accommodation, pk=accommodation_id)
 
         if accommodation.is_reserved:
@@ -185,7 +185,7 @@ def rate_reservation(request, reservation_id):
 
 # Web views
 def reservation_list_view(request, user_id):
-    user = get_object_or_404(User, pk=user_id)
+    user = get_object_or_404(Student, pk=Student.user_id)
     reservations = Reservation.objects.filter(user=user)
     return render(request, 'reservation_list.html', {
         'reservations': reservations,
