@@ -183,16 +183,16 @@ def api_search(request):
 def api_rate(request):   
     userId = request.POST.get('userId')
     try:
-        user = User.objects.get(user_id=userId)
+        user = Student.objects.get(user_id=userId)
         print(user.name)
-    except User.DoesNotExist:
+    except Student.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)  
-    reservation_id = request.POST.get('reservId')
     accommodation_id = request.POST.get('accId')
     newRating = request.POST.get('rating')
     date = request.POST.get('date')
     rating = Rating.objects.create(
-            reservation=Reservation.objects.get(reservation_id=reservation_id),
+            user = Student.objects.get(user_id=userId),
+            accommodation = Accommodation.objects.get(accommodation_id=accommodation_id),
             rating=newRating,
             date=date
         )
