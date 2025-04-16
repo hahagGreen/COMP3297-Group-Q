@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponse, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
-from .models import Accommodation, Specialist, Reservation,Student
+from .models import Accommodation, Specialist, Reservation
 import json
 import requests
 from .serializers import AccommodationSerializer, ReservationSerializer
@@ -85,6 +85,7 @@ def api_cancel_reservation(request):
             reservation.save()  # Triggers save() to update Accommodation.is_reserved
 
             user = Specialist.objects.get(user_id=userID)
+
             send_mail(
                 'Reservation Cancellation Confirmation',
                 f'reservation #{reservation_id} for accommodation at {Accommodation.address} has been cancelled successfully',
@@ -146,10 +147,11 @@ def api_modify(request):
                 accommodation.is_reserved = 1
                 accommodation.save()
                 # Send email notification to student
+
                 send_mail(
                     'Your Reservation Status Update',
                     f'Your reservation #{reservation_id} for accommodation at {accommodation.address} has been {new_status}.',
-                    'admin@unihaven.com',
+                    'noreplyhku0@gmail.com',
                     [reservation.user.email],
                     fail_silently=False,
                 )
