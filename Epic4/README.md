@@ -126,7 +126,7 @@ Output:
 ```
 
 ```
-3. Invalid Status
+4. Invalid Status
 Input:  
       reservation_id = 1
       status = test
