@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Accommodation, Reservation, User
+from .models import Accommodation, Reservation, Student, Specialist
 
 class AccommodationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,12 +17,12 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     def get_username(self, obj):
         # Fetch the related User instance using user_id
-        user = User.objects.get(user_id=obj.user_id)
+        user = Student.objects.get(user_id=obj.user_id)
         return user.name
     
     def get_email(self, obj):
         # Fetch the related User instance using user_id
-        user = User.objects.get(user_id=obj.user_id)
+        user = Student.objects.get(user_id=obj.user_id)
         return user.email
     
     def get_address(self, obj):
