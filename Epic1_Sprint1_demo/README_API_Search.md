@@ -23,11 +23,11 @@ Retrieve a list of accommodations matching the specified filters.
   | `accommodation_type` | String  | Type of accommodation (e.g., "Room", "Flat", "Mini-Hall")                  | `Room`              |
   | `availability_start` | Date    | Start date of availability (format: `YYYY-MM-DD`)                          | `2023-01-01`       |
   | `availability_end`   | Date    | End date of availability (format: `YYYY-MM-DD`)                            | `2023-12-31`       |
-  | `min_beds`           | Integer | Minimum number of beds (default = 1, must be ≥ 1)                                       | `2`                 |
-  | `min_bedrooms`       | Integer | Minimum number of bedrooms (defalt = 1, must be ≥ 1)                                   | `1`                 |
-  | `max_price`          | Float   | Maximum price in HKD (must be ≥ 0)                                         | `6000.00`           |
+  | `min_beds`           | Integer | Minimum number of beds                                      | `2`                 |
+  | `min_bedrooms`       | Integer | Minimum number of bedrooms                            | `1`                 |
+  | `max_price`          | Float   | Maximum price in HKD                                       | `6000.00`           |
   | `campus`             | Integer | Campus ID to sort results by distance (fetches from `Campus` table)        | `1`                 |
-  | `is_reserved`             | Boolean | Show reservation available accommodations only (defaul = 0)        | `1`                 |
+  | `is_reserved`             | Boolean | Show reservation available accommodations only     | `1`                 |
 
 #### **Response**
 - **Content-Type**: `application/json`
@@ -125,5 +125,5 @@ Retrieve a list of accommodations matching the specified filters.
 ## Notes
 - **Distance Calculation**: When `campus` is provided, accommodations are sorted by distance from the campus using an equirectangular approximation. Distances are in kilometers and included in the response.
 - **Geocoding**: If an accommodation lacks latitude/longitude, the API attempts to geocode its address using the DATA.GOV.HK API and saves the coordinates for future requests.
-- **Availability**: The `is_reserved` field indicates current reservation status, but the API does not filter out reserved accommodations by default.
-- **Validation**: Parameters are validated (e.g., `min_beds` must be ≥ 1). Invalid inputs return a 400 error with details.
+- **Availability**: The `is_reserved` field indicates current reservation status.
+- **Validation**: Parameters are validated. Invalid inputs return a 400 error with details.
