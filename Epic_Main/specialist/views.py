@@ -40,6 +40,9 @@ def setAccommodation(data):
     accommodation.beds = data.get("beds")   
     accommodation.bedrooms = data.get("bedrooms")
     accommodation.price = data.get("price")
+    accommodation.building_name = data.get("buildingName")
+    accommodation.owner_name = data.get("ownerName")
+    accommodation.owner_contact = data.get("ownerContact")
     accommodation.address = data.get("address")
     query = fetch_coordinates(accommodation.address)[0]
     accommodation.geo_address, accommodation.latitude, accommodation.longitude = getGeoAddress(json.loads(query.text))
