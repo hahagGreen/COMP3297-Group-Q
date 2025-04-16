@@ -58,7 +58,7 @@ Input:
 Endpoint: /specialist/api_cancel?reservation_id=45  
 Output:  
 {
-  "message": "Reservation Canceled"
+  "message": "Reservation canceled successfully"
 }
 ```
 
@@ -72,12 +72,22 @@ Output:
 }
 ```
 
+```
+3. Reservation ID does not exist
+Input:  
+      reservation_id = 0
+Output:  
+{
+  "error": "Reservation not found"
+}
+```
+
 3. **api_modify**
 Endpoint: `/specialist/api_modify`
 
 | Method  | Parameters | Description |  
 | ------------- | ------------- | ------------- |  
-| POST  | 1.reservation_id (Integer)<br> 2.status (['pending','confirmed','canceled','completed']) | Modify the status of reservation. |
+| POST  | 1.reservation_id (Integer)<br> 2.status (["pending","confirmed","canceled","completed"]) | Modify the status of reservation. |
 
 ***Sample Input and Output***
 ```
@@ -94,11 +104,34 @@ Output:
 ```
 
 ```
-2. Invalid Reservation ID or status
+2. No Reservation ID or status
 Input:  
       reservation_id = NULL
+      status = NULL
 Output:  
 {
   "error": "Missing reservation_id or status"
+}
+```
+
+```
+3. Invalid Reservation ID
+Input:  
+      reservation_id = -1
+      status = pending
+Output:  
+{
+  "error": "Reservation not found"
+}
+```
+
+```
+3. Invalid Status
+Input:  
+      reservation_id = 1
+      status = test
+Output:  
+{
+  "error": "Invalid status"
 }
 ```
