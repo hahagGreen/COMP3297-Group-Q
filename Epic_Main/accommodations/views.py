@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponse, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
-from .models import Accommodation, Rating, Campus, User, Reservation
+from .models import Accommodation,Rating, Specialist,Student, Reservation
 from .serializers import AccommodationSerializer, RatingSerializer
 from datetime import datetime
 import math
