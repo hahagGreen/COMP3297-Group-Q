@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 
 def create_database():
     # Connect to the database
@@ -8,7 +9,7 @@ def create_database():
     # Enable foreign key constraints
     cursor.execute("PRAGMA foreign_keys = ON;")
 
-    # Create User table with phone field
+    # Create User table with phone field added
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS User (
         user_id INTEGER PRIMARY KEY,
@@ -29,18 +30,19 @@ def create_database():
     )
     ''')
 
-    # Create Building table
+    # Create Building table with geo_address
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Building (
         building_id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         latitude REAL NOT NULL,
         longitude REAL NOT NULL,
-        address TEXT NOT NULL
+        address TEXT NOT NULL,
+        geo_address TEXT
     )
     ''')
 
-    # Create Accommodation table with references to Building and Owner
+    # Create Accommodation table with building_id, owner_id, and unit
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Accommodation (
         accommodation_id INTEGER PRIMARY KEY,
@@ -52,6 +54,7 @@ def create_database():
         price REAL NOT NULL CHECK(price > 0),
         building_id INTEGER NOT NULL,
         owner_id INTEGER NOT NULL,
+        unit TEXT,
         is_reserved INTEGER NOT NULL DEFAULT 0 CHECK(is_reserved IN (0, 1)),
         average_rating REAL DEFAULT 0,
         rating_count INTEGER DEFAULT 0,
@@ -94,7 +97,7 @@ def create_database():
     )
     ''')
 
-    # Create triggers
+    # Create triggers to maintain relationships
     cursor.execute('''
     CREATE TRIGGER IF NOT EXISTS update_accommodation_reserved_insert
     AFTER INSERT ON Reservation
@@ -111,6 +114,7 @@ def create_database():
     END;
     ''')
 
+    # Fixed trigger to correctly reference NEW.rating
     cursor.execute('''
     CREATE TRIGGER IF NOT EXISTS update_accommodation_rating_insert
     AFTER INSERT ON Rating
@@ -132,8 +136,8 @@ def create_database():
         SET 
             rating_count = rating_count - 1,
             average_rating = CASE
-                WHEN rating_count > 1 THEN (average_rating * rating_count - OLD.rating) / (rating_count - 1)
-                ELSE 0
+                WHEN rating_count <= 1 THEN 0
+                ELSE (average_rating * (rating_count + 1) - OLD.rating) / (rating_count)
             END
         WHERE 
             accommodation_id = (SELECT accommodation_id FROM Reservation WHERE reservation_id = OLD.reservation_id);
@@ -142,6 +146,16 @@ def create_database():
 
     # Commit changes
     conn.commit()
+
+    # Check if tables are created
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    print("Tables in the database:", tables)
+
+    # Check triggers
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='trigger';")
+    triggers = cursor.fetchall()
+    print("Triggers in the database:", triggers)
 
     # Close connection
     cursor.close()
