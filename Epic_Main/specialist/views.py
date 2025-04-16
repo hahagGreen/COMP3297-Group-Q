@@ -62,20 +62,8 @@ def api_add(request):
     if request.method == "POST":
         accommodation = setAccommodation(request.POST)
         accommodation.save()
-        accommodation_details = {
-            'id': accommodation.accommodation_id,
-            'startDate': accommodation.availability_start,
-            'endDate': accommodation.availability_end,
-            'type': accommodation.type,
-            'numOfBeds': accommodation.beds,
-            'numOfBedrooms': accommodation.bedrooms,
-            'price': accommodation.price,
-            'address': accommodation.address,
-            'geo_address': accommodation.geo_address,
-            'latitude': accommodation.latitude,
-            'longitude': accommodation.longitude,
-        }
-        return JsonResponse(accommodation_details)
+        serializers = AccommodationSerializer(accommodation)
+        return Response(serializers.data)
     else:
         return HttpResponse("Invalid request method.")
 
