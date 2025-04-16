@@ -146,52 +146,43 @@ paths:
         '404':
           description: User not found
 
-  /specialist/api_edit/:
+    /specialist/api_modify/:
     post:
-      operationId: editAccommodation
-      summary: Edit Accommodation
-      description: Edit an existing accommodation (Specialist only)
-      requestBody:
+      operationId: modifyReservationStatus
+      summary: Modify Reservation Status
+      description: Update the status of an existing reservation (Specialist only)
+      parameters:
+      - name: reservation_id
+        in: query
         required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                userId:
-                  type: integer
-                accId:
-                  type: integer
-                startDate:
-                  type: string
-                  format: date
-                endDate:
-                  type: string
-                  format: date
-                type:
-                  type: string
-                beds:
-                  type: integer
-                  minimum: 1
-                bedrooms:
-                  type: integer
-                  minimum: 1
-                price:
-                  type: number
-                  minimum: 0
-                address:
-                  type: string
+        schema:
+        type: integer
+        description: ID of the reservation to modify
+      - name: status
+        in: query
+        required: true
+        schema:
+        type: string
+        enum: [pending, confirmed, canceled, completed]
+        description: New status for the reservation
       responses:
-        '200':
-          description: Accommodation updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Accommodation'
-        '403':
-          description: User is not a specialist
-        '404':
-          description: User or Accommodation not found
+      '200':
+        description: Reservation status updated successfully
+        content:
+        application/json:
+          schema:
+          type: object
+          properties:
+            message:
+            type: string
+      '400':
+        description: Invalid request (missing parameters or invalid status)
+      '404':
+        description: Reservation not found
+      '405':
+        description: Invalid request method
+      '500':
+        description: Server error
 
   /reservation/list/{user_id}/:
     get:
