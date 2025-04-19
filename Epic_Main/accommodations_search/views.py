@@ -1,3 +1,4 @@
+# Create your views here.
 # accommodations/views.py
 import datetime
 from django.shortcuts import render

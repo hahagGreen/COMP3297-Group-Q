@@ -24,6 +24,7 @@ urlpatterns = [
     path('accommodations/', include('accommodations.urls')),
     path('specialist/', include('specialist.urls')),
     path('reservation/', include('Reservation.urls')),
+    path('accommodations_search/', include('accommodations_search.urls')),
 
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

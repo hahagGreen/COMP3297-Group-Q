@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "Reservation",
     "rest_framework",
     "drf_spectacular",
+    "accommodations_search.apps.AccommodationsSearchConfig",
 ]
 
 MIDDLEWARE = [
