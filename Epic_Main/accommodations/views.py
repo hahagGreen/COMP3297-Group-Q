@@ -69,20 +69,18 @@ def api_viewDetails(request):
     # Get user ID from request
     userId = request.POST.get('userId')
     try:
-        # Check if user exists - no need to store the result if we're just validating
-        Student.objects.get(user_id=userId)
-    except Student.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
+        user = Student.objects.get(student_id=userId)
+        print(user.name)
     except Student.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
     accommodation_id = request.GET.get('accId')
     if not accommodation_id:
         return JsonResponse({'error': 'Accommodation ID is required'}, status=400)
-
+        
     try:
-        accommodation = get_object_or_404(Accommodation, pk=accommodation_id)
+        accommodation = get_object_or_404(Accommodation,pk=accommodation_id)
         serializers = AccommodationSerializer(accommodation)
-
+        
     except Accommodation.DoesNotExist:
         return JsonResponse({'error': 'Accommodation not found'}, status=404)
     return Response(serializers.data)
@@ -286,7 +284,7 @@ class ApiRateView(generics.GenericAPIView):
         # Get parameters from URL query string instead of form data
         userId = request.GET.get('userId')
         try:
-            user = Student.objects.get(user_id=userId)
+            user = Student.objects.get(student_id=userId)
         except Student.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
         
@@ -307,7 +305,7 @@ class ApiRateView(generics.GenericAPIView):
             accommodation = Accommodation.objects.get(accommodation_id=accommodation_id)
             count = accommodation.rating_count
             accommodation.rating_count = count + 1
-            accommodation.average_rating = (accommodation.average_rating * count + int(newRating)) / (count + 1)
+            accommodation.average_rating = (accommodation.average_rating * count + int(newRating)) / (count + 1) if accommodation.average_rating else int(newRating)
             accommodation.save()
         except Accommodation.DoesNotExist:
             return JsonResponse({'error': 'Accommodation not found'}, status=404)
