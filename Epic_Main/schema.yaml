@@ -545,6 +545,21 @@ paths:
         schema:
           type: string
         description: Name of the owner
+       - in: query
+        name: roomNumber
+        schema:
+          type: string
+        description: Room number
+       - in: query
+        name: flatName
+        schema:
+          type: string
+        description: Flat number
+       - in: query
+        name: floorName
+        schema:
+          type: string
+        description: Floor Number
       - in: query
         name: price
         schema:
