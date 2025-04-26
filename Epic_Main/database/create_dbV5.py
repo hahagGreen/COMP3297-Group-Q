@@ -126,7 +126,7 @@ def create_database():
         user_id INTEGER NOT NULL, -- FK to Student
         accommodation_id INTEGER NOT NULL,
         status TEXT NOT NULL CHECK(status IN ('pending', 'confirmed', 'canceled', 'completed')),
-        FOREIGN KEY (user_id) REFERENCES Student(user_id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES Student(student_id) ON DELETE CASCADE,
         FOREIGN KEY (accommodation_id) REFERENCES Accommodation(accommodation_id) ON DELETE CASCADE
     )
     ''')
@@ -141,7 +141,7 @@ def create_database():
         rating INTEGER NOT NULL CHECK(rating BETWEEN 0 AND 5),
         comment TEXT,
         date TEXT NOT NULL, -- Consider using DATETIME type
-        FOREIGN KEY (user_id) REFERENCES Student(user_id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES Student(student_id) ON DELETE CASCADE,
         FOREIGN KEY (accommodation_id) REFERENCES Accommodation(accommodation_id) ON DELETE CASCADE
     )
     ''')
