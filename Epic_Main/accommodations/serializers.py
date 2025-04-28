@@ -24,13 +24,7 @@ class AccommodationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Accommodation
-        fields = [
-            'id', 'startDate', 'endDate', 'type', 'numOfBeds',
-            'numOfBedrooms', 'price', 'address',
-            'latitude', 'longitude', 'is_reserved', 'distance',
-            'building_name', 'owner_name', 'owner_contact',
-            'average_rating', 'rating_count'
-        ]
+        fields = '__all__'
 
     @extend_schema_field(serializers.CharField())
     def get_is_reserved(self, obj):
