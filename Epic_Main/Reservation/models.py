@@ -10,7 +10,6 @@ class Campus(models.Model):
 
     class Meta:
         db_table = 'Campus'
-        managed = False
 
     def __str__(self):
         return self.name
@@ -28,7 +27,6 @@ class Student(models.Model):
 
     class Meta:
         db_table = 'Student'
-        managed = False
 
     def __str__(self):
         return self.name
@@ -46,7 +44,6 @@ class Specialist(models.Model):
 
     class Meta:
         db_table = 'Specialist'
-        managed = False
 
     def __str__(self):
         return self.name
@@ -78,7 +75,6 @@ class Accommodation(models.Model):
 
     class Meta:
         db_table = 'Accommodation'
-        managed = False
         unique_together = (("room_number", "flat_number", "floor_number", "geo_address"),)
 
     def __str__(self):
@@ -103,7 +99,6 @@ class AccommodationOffering(models.Model):
 
     class Meta:
         db_table = 'AccommodationOffering'
-        managed = False
         unique_together = (("accommodation", "campus"),)
 
     def __str__(self):
@@ -131,7 +126,6 @@ class Reservation(models.Model):
 
     class Meta:
         db_table = 'Reservation'
-        managed = False
 
     def __str__(self):
         return f"Reservation {self.reservation_id} - {self.get_status_display()}"
@@ -149,7 +143,6 @@ class Rating(models.Model):
 
     class Meta:
         db_table = 'Rating'
-        managed = False
 
     def __str__(self):
         return f"Rating {self.rating} for {self.accommodation}"
