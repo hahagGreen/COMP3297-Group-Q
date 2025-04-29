@@ -27,7 +27,6 @@ def fetch_coordinates(location):
 
 # Retrieve geolocation data from the API json response
 def getGeoAddress(jsonData):
-    print(jsonData)
     data = jsonData["SuggestedAddress"][0]["Address"]["PremisesAddress"]
     geogAddr = data.get("GeoAddress")
     latitude = data.get("GeospatialInformation").get("Latitude")
