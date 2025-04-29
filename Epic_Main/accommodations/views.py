@@ -294,15 +294,7 @@ class ApiRateView(generics.GenericAPIView):
         newRating = request.GET.get('rating')
         date = request.GET.get('date')
         comment = request.GET.get('comment')  # Optional parameter
-        
-        rating = Rating.objects.create(
-            user=user,
-            accommodation=Accommodation.objects.get(accommodation_id=accommodation_id),
-            rating=newRating,
-            date=date,
-            comment=comment
-        )
-        
+
         try:
             accommodation = Accommodation.objects.get(accommodation_id=accommodation_id)
             count = accommodation.rating_count
@@ -311,6 +303,14 @@ class ApiRateView(generics.GenericAPIView):
             accommodation.save()
         except Accommodation.DoesNotExist:
             return JsonResponse({'error': 'Accommodation not found'}, status=404)
+            
+        rating = Rating.objects.create(
+            user=user,
+            accommodation=Accommodation.objects.get(accommodation_id=accommodation_id),
+            rating=newRating,
+            date=date,
+            comment=comment
+        )
         
         serializers_rating = RatingSerializer(rating)
         serializers_accommodation = AccommodationSerializer(accommodation)
