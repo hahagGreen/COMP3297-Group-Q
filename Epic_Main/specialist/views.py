@@ -89,6 +89,12 @@ def add_accommodations(request):
                          description='Name of the owner'),
         OpenApiParameter(name="ownerContact", type=str, location=OpenApiParameter.QUERY, required=False,
                          description='Contact information of the owner'),
+        OpenApiParameter(name="roomNumber", type=str, location=OpenApiParameter.QUERY, required=True,
+                         description='Room Number'),
+        OpenApiParameter(name="flatNumber", type=str, location=OpenApiParameter.QUERY, required=True,
+                         description='Flat Number'),
+        OpenApiParameter(name="floorNumber", type=str, location=OpenApiParameter.QUERY, required=True,
+                         description='Floor Number')
     ],
     responses={
         200: SpecialistAccommodationSerializer,
